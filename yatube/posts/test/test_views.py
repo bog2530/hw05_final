@@ -4,7 +4,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from ..forms import PostForm
-from ..models import Group, Post, User
+from ..models import Follow, Group, Post, User
 from ..views import LIMIT
 
 POSTS = 13
@@ -206,8 +206,11 @@ class FollowingViewsTest(TestCase):
             'posts:profile_follow',
             kwargs={'username': self.user_2.username}),
         )
+        follower = Follow.objects.latest('id')
         user_following_count = self.user_1.follower.count()
         self.assertEqual(user_following_count, 1)
+        self.assertEqual(self.user_1.id, follower.user.id)
+        self.assertEqual(self.user_2.id, follower.author.id)
         self.authorized_client_1.get(reverse(
             'posts:profile_unfollow',
             kwargs={'username': self.user_2.username}),
@@ -227,6 +230,7 @@ class FollowingViewsTest(TestCase):
         self.assertIn('page_obj', response.context)
         post_text = response.context['page_obj'][0].text
         self.assertEqual(post_text, FollowingViewsTest.post.text)
+        self.assertTemplateUsed(response, 'posts/follow.html')
 
     def test_not_folowing_post(self):
         "Тест ленты подписок не подписанного пользователя"

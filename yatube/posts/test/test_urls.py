@@ -28,7 +28,13 @@ class StaticURLTests(TestCase):
         cls.url_authorized_client = {
             f'/posts/{cls.post.id}/edit/': 'posts/create_post.html',
             '/create/': 'posts/create_post.html',
+            '/follow/': 'posts/follow.html',
         }
+        cls.url_found = [
+            f'/posts/{cls.post.id}/comment/',
+            f'/profile/{cls.user_1}/follow/',
+            f'/profile/{cls.user_1}/unfollow/',
+        ]
 
     def setUp(self):
         self.guest_client = Client()
@@ -49,6 +55,7 @@ class StaticURLTests(TestCase):
         "Запрос к несуществующей странице"
         response = self.guest_client.get('/unexisting_page/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertTemplateUsed(response, 'core/404.html')
 
     def test_urls_authorized_client(self):
         "Доступность страниц для авторизованного клиента"
@@ -76,15 +83,24 @@ class StaticURLTests(TestCase):
                     response, (f'/auth/login/?next={url}'))
 
     def test_urls_authorized_client_correct_template(self):
-        "Проверка вызываемых HTML-шаблонов для гостя"
+        "Проверка вызываемых HTML-шаблонов авторизованного клиента"
         for url, template in self.url_authorized_client.items():
             with self.subTest(url=url):
                 response = self.authorized_client_1.get(url)
                 self.assertTemplateUsed(response, template)
 
     def test_urls_guest_client_correct_template(self):
-        "Проверка вызываемых HTML-шаблонов авторизованного клиента"
+        "Проверка вызываемых HTML-шаблонов для гостя"
         for url, template in self.url_guest_client.items():
             with self.subTest(url=url):
                 response = self.guest_client.get(url)
                 self.assertTemplateUsed(response, template)
+
+    def test_urls_authorized_client(self):
+        """Доступность страниц для авторизованного клиента
+            comment follow unfollow
+        """
+        for url in self.url_found:
+            with self.subTest(url=url):
+                response = self.authorized_client_2.get(url)
+                self.assertEqual(response.status_code, HTTPStatus.FOUND)

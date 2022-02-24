@@ -89,7 +89,6 @@ def post_create(request):
         new_post.author = request.user
         new_post.save()
         return redirect('posts:profile', new_post.author)
-    form = PostForm()
     context = {
         'title': title,
         'form': form,
@@ -113,7 +112,6 @@ def post_edit(request, post_id):
     if form.is_valid():
         post.save()
         return redirect('posts:post_detail', post_id)
-    form = PostForm(instance=post)
     context = {
         'title': title,
         'form': form,
