@@ -65,5 +65,7 @@ python manage.py runserver
 
 ## Автор
 [Шумский Богдан](https://github.com/bog2530)
+
 Telegram: [@bog2530](https://t.me/bog2530)
+
 Email: bog2530@gmail.com
